@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casa Mémoire: Casablanca Heritage Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body { height:100%; margin:0; padding:0; font-family:sans-serif; }
+  #map { 
+  height: calc(100% - 30px); /* leave space for footer */
+  width: 100%; 
+}
+    .legend {
+      position:absolute;
+      bottom:10px;
+      left:10px;
+      background:white;
+      padding:8px;
+      border-radius:8px;
+      box-shadow:0 0 5px rgba(0,0,0,0.3);
+      font-size:13px;
+      line-height:1.4em;
+    }
+    .popup-title { font-weight:bold; margin-bottom:4px; font-size:14px; }
+    .popup-details { font-size:13px; line-height:1.3em; }
+    .logo {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 100px;
+      z-index: 1000;
+    }
+   footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  text-align: center;
+  padding: 5px 0;
+  font-size: 12px;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  z-index: 1001; /* higher than map layers */
+}
+	<style>
+  html, body { height:100%; margin:0; padding:0; font-family:sans-serif; }
+  #map { height:100%; width:100%; }
+
+  /* Legend styling */
+  .legend {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: white;       /* solid background */
+    opacity: 1;              /* fully opaque */
+    padding: 10px 12px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    font-size: 13px;
+    line-height: 1.4em;
+    z-index: 1000;           /* keep above map layers */
+  }
+
+  .popup-title { font-weight:bold; margin-bottom:4px; font-size:14px; }
+  .popup-details { font-size:13px; line-height:1.3em; }
+
+  /* Optional: Footer styling if you use a fixed div */
+  .footer {
+    background: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    font-size: 13px;
+    line-height: 1.4em;
+    opacity: 0.9;
+  }
+</style>
+
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="legend">
+    <b>Legend</b><br>
+    🏘️ Neighborhood / Circuit<br>
+    🏛️ Museum / Cultural Center<br>
+    🕌 Religious Site<br>
+    🏰 Historic Building / Fort / Gate<br>
+    🚶 Circuit Start Point
+  </div>
+  <img src="https://www.casamemoire.org/css/images/logo.png" alt="Casa Mémoire Logo" class="logo" onclick="window.open('https://www.casamemoire.org', '_blank')" style="cursor:pointer;">
+  <footer>
+    A digital project by Hiba Azzouz, in collaboration with Casa Mémoire.
+  </footer>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Initialize map
+    var map = L.map('map').setView([33.5731, -7.5898], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Heritage-rich Casablanca sites
+  var sites = [
+  // HABOUS
+  {name:"Habous Quarter", coords:[33.5880,-7.6160], emoji:"🏘️", details:
+    "<b>Date:</b> 1920s–1930s<br><b>Architect/Planner:</b> Henri Prost (French Protectorate)<br><b>Function:</b> Residential and commercial 'new medina'<br><b>History:</b> Created to organize urban growth and provide modern infrastructure for Casablanca’s Muslim population. Combines traditional Moroccan architectural elements (riads, arcades) with orderly streets. Hosts souks, cafes, and administrative buildings including the Ministry of Islamic Affairs." },
+
+  {name:"Mahkama du Pacha", coords:[33.5865,-7.6180], emoji:"🏰", details:
+    "<b>Date:</b> 1941–1942<br><b>Architect:</b> Auguste Cadet<br><b>Function:</b> Courthouse, Pasha’s residence, administrative offices<br><b>History:</b> Built during WWII under resource constraints, this neo-Moorish palace demonstrates Morocco’s traditional craftsmanship—stucco, carved cedar, zellige, and marble. A major heritage site, rarely open to the public."},
+
+  {name:"Dar El Ala (Museum of Andalusian Music)", coords:[33.5870,-7.6155], emoji:"🏛️", details:
+    "<b>Date:</b> 2010<br><b>Architect:</b> Modern cultural adaptation<br><b>Function:</b> Music museum and cultural center<br><b>History:</b> Dedicated to preserving and promoting Mauro-Andalusian music. Hosts concerts, workshops, and exhibitions, linking intangible musical heritage with Casablanca’s architectural legacy."},
+
+  {name:"Hammam Chiki", coords:[33.5875,-7.6140], emoji:"🏰", details:
+    "<b>Date:</b> Early 20th century<br><b>Function:</b> Public bathhouse<br><b>History:</b> Traditional hammam offering insight into daily Moroccan social life and hygiene practices, reflecting cultural continuity in the Habous district."},
+
+  {name:"Habous Circuit Start", coords:[33.5862,-7.6185], emoji:"🚶", details:
+    "<b>Function:</b> Walking tour start<br><b>History:</b> Designed as the starting point for exploring Habous, guiding visitors through the district’s architecture, markets, and artisan heritage."},
+
+  // OLD MEDINA
+  {name:"Old Medina", coords:[33.5910,-7.6110], emoji:"🏘️", details:
+    "<b>Date:</b> 15th century origins, rebuilt 1755–1789<br><b>Architect:</b> Sultan Sidi Mohammed Ben Abdellah<br><b>Function:</b> Residential, commercial, religious hub<br><b>History:</b> Built around the Berber port town of Anfa, rebuilt after Portuguese destruction and the 1755 Lisbon earthquake. Labyrinthine streets, fountains, markets, and fortified walls preserve early urban life."},
+
+  {name:"Sour J’did Gate", coords:[33.5905,-7.6095], emoji:"🏰", details:
+    "<b>Date:</b> 18th century reconstruction<br><b>Function:</b> Main access gate<br><b>History:</b> Controls entry to the Medina, part of defensive walls erected under Sultan Sidi Mohammed Ben Abdellah, highlighting pre-colonial urban architecture."},
+
+  {name:"Ould Lhamra Mosque", coords:[33.5915,-7.6105], emoji:"🕌", details:
+    "<b>Date:</b> 15th–18th century<br><b>Function:</b> Active mosque<br><b>History:</b> Spiritual center within the Medina. One of the oldest surviving mosques, demonstrating Casablanca’s enduring Islamic heritage."},
+
+  {name:"Sqala of Casablanca", coords:[33.5925,-7.6140], emoji:"🏰", details:
+    "<b>Date:</b> 18th century<br><b>Function:</b> Coastal bastion<br><b>History:</b> Fortification defending the harbor from naval attacks. Currently a cultural and tourist site, combining military heritage with leisure and panoramic views."},
+
+  {name:"Old Medina Circuit Start", coords:[33.5920,-7.6090], emoji:"🚶", details:
+    "<b>Function:</b> Walking tour start<br><b>History:</b> Serves as entry point for exploring the Old Medina’s markets, historic gates, and cultural life."},
+
+  // DOWNTOWN (ART DECO & PROTECTORATE)
+  {name:"Downtown Casablanca (Centre Ville)", coords:[33.5738,-7.5890], emoji:"🏘️", details:
+    "<b>Date:</b> 1917 onwards<br><b>Planner:</b> Henri Prost<br><b>Function:</b> Administrative and commercial hub<br><b>History:</b> Wide boulevards, Art Deco and neo-Moorish buildings. Key urban axis: Boulevard Mohammed V. Casablanca’s Protectorate-era urban planning exemplified."},
+
+  {name:"Villa des Arts", coords:[33.5725,-7.5905], emoji:"🏛️", details:
+    "<b>Date:</b> 1934<br><b>Architect:</b> Unknown (Art Deco mansion)<br><b>Function:</b> Art gallery and cultural center<br><b>History:</b> Preserves contemporary Moroccan art; illustrates adaptive reuse of colonial-era villas for cultural purposes."},
+
+  {name:"Marché Central", coords:[33.5730,-7.5900], emoji:"🏰", details:
+    "<b>Date:</b> 1917<br><b>Architect:</b> Pierre Bousquet<br><b>Function:</b> Central food market<br><b>History:</b> Social hub blending Moroccan commerce traditions with early 20th-century urban modernization."},
+
+  {name:"Place Mohammed V", coords:[33.5740,-7.5895], emoji:"🏰", details:
+    "<b>Date:</b> Early 20th century<br><b>Function:</b> Civic square and administrative center<br><b>History:</b> Surrounded by Neo-Moorish and Art Deco buildings; administrative heart of Protectorate Casablanca."},
+
+  {name:"Église du Sacré-Cœur", coords:[33.5897,-7.6242], emoji:"🏰", details:
+    "<b>Date:</b> 1930–1954<br><b>Architect:</b> Paul Tournon<br><b>Function:</b> Catholic cathedral (now exhibition space)<br><b>History:</b> Combines Neo-Gothic and Art Deco. Cosmopolitan symbol, now used for cultural events."},
+
+  {name:"Wilaya of Casablanca", coords:[33.5739,-7.5893], emoji:"🏰", details:
+    "<b>Date:</b> 1920s<br><b>Architect:</b> Marius Boyer<br><b>Function:</b> Administrative building<br><b>History:</b> Neo-Moorish with Italian influences, houses central administration; key civic landmark."},
+
+  {name:"Portuguese Tower (Bastion)", coords:[33.5960,-7.6175], emoji:"🏰", details:
+    "<b>Date:</b> 16th century<br><b>Builders:</b> Portuguese<br><b>Function:</b> Coastal defense<br><b>History:</b> Rare surviving vestige of Portuguese military occupation, highlighting pre-French colonial heritage."},
+
+  {name:"Villa El Mokri", coords:[33.5892,-7.6190], emoji:"🏰", details:
+    "<b>Date:</b> Early 20th century<br><b>Owner:</b> El Mokri family<br><b>Function:</b> Private residence<br><b>History:</b> Prestigious neo-Moorish villa with gardens, exemplifying high-status residential architecture from the Protectorate era."},
+
+  {name:"Lycée Lyautey", coords:[33.5940,-7.6325], emoji:"🏛️", details:
+    "<b>Date:</b> 1921<br><b>Architect:</b> Georges-Ernest Desmarest<br><b>Function:</b> Secondary school<br><b>History:</b> Iconic Protectorate educational institution; still active, representing continuity of French-influenced academic heritage."},
+
+  {name:"Villa Zevaco", coords:[33.5722,-7.6290], emoji:"🏰", details:
+    "<b>Date:</b> 1947<br><b>Architect:</b> Jean-François Zevaco<br><b>Function:</b> Private modernist residence<br><b>History:</b> Landmark of post-WWII Moroccan modernist architecture; transition from Art Deco to avant-garde styles."},
+
+  {name:"Église Notre-Dame de Lourdes", coords:[33.5839,-7.6230], emoji:"🏰", details:
+    "<b>Date:</b> 1954–1956<br><b>Architect:</b> Achille Dangleterre<br><b>Function:</b> Modernist church<br><b>History:</b> Features Gabriel Loire stained-glass panels. Represents Casablanca’s religious diversity and 20th-century experimentation in sacred architecture."},
+
+  {name:"Parc de la Ligue Arabe", coords:[33.5860,-7.6250], emoji:"🏘️", details:
+    "<b>Date:</b> 1918<br><b>Planner:</b> Henri Prost<br><b>Function:</b> Public park<br><b>History:</b> Casablanca’s largest urban green space, incorporating fountains and palm alleys; integrates nature into colonial-era urbanism."},
+
+  {name:"Maarif District", coords:[33.5830,-7.6400], emoji:"🏘️", details:
+    "<b>Date:</b> Early 20th century<br><b>Function:</b> Mixed residential and commercial district<br><b>History:</b> Evolved from Protectorate military camp into a modern neighborhood with shopping avenues and Art Deco apartments."},
+
+  {name:"Roches Noires District", coords:[33.6000,-7.5800], emoji:"🏘️", details:
+    "<b>Date:</b> Early 20th century<br><b>Function:</b> Industrial and residential suburb<br><b>History:</b> Hosts workers’ housing and factories, reflecting Casablanca’s industrial expansion under the Protectorate."},
+
+  // CORNICHE
+  {name:"Hassan II Mosque", coords:[33.6073,-7.6323], emoji:"🕌", details:
+    "<b>Date:</b> 1986–1993<br><b>Architect:</b> Michel Pinseau<br><b>Function:</b> Mosque<br><b>History:</b> Oceanfront landmark with 210m minaret; blends traditional Moroccan design with modern engineering, symbolizing contemporary Moroccan identity."},
+
+  {name:"Corniche", coords:[33.6010,-7.6260], emoji:"🏘️", details:
+    "<b>Date:</b> 1930s onwards<br><b>Function:</b> Coastal promenade<br><b>History:</b> Leisure and cultural hub with cafés, restaurants, and promenades; illustrates Casablanca’s Atlantic-facing urban development."},
+
+  // ART DECO CULTURE
+  {name:"Cinema Rialto", coords:[33.5885,-7.6145], emoji:"🏰", details:
+    "<b>Date:</b> 1930<br><b>Style:</b> Art Deco<br><b>Function:</b> Cinema<br><b>History:</b> Hosted international artists; emblematic of Casablanca’s film and urban cultural heritage."},
+
+  {name:"Old Abattoirs (Anciens Abattoirs)", coords:[33.5890,-7.6185], emoji:"🏰", details:
+    "<b>Date:</b> 1912 (modernized 1922)<br><b>Style:</b> Industrial architecture with neo-Mauresque features<br><b>Function:</b> Slaughterhouse, now cultural hub<br><b>History:</b> Repurposed for exhibitions, workshops, and performances; example of adaptive reuse of industrial heritage."}
+];
+
+
+// Add markers
+sites.forEach(function(site){
+  var icon = L.divIcon({html:'<div style="font-size:22px">'+site.emoji+'</div>', iconSize:[22,22], className:""});
+  var popupContent = '<div class="popup-title">'+site.name+' '+site.emoji+'</div><div class="popup-details">'+site.details+'</div>';
+  L.marker(site.coords, {icon:icon}).addTo(map).bindPopup(popupContent);
+});
+
+// Fit map
+var bounds = L.latLngBounds([33.5700,-7.6400],[33.6100,-7.5800]);
+map.fitBounds(bounds);
+</script>
+</body>
+</html>
+
